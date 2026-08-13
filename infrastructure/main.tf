@@ -29,12 +29,29 @@ resource "aws_s3_bucket_versioning" "documents" {
 }
 resource "aws_s3_bucket_cors_configuration" "documents" {
   bucket = aws_s3_bucket.documents.id
+
   cors_rule {
-    allowed_headers = ["*"]
-    allowed_methods = ["PUT"]
-    allowed_origins = [var.allowed_origin]
-    expose_headers  = ["ETag"]
-    max_age_seconds = 300
+    id = "portal-document-uploads"
+
+    allowed_origins = [
+      "https://d2wee0ha8t8zn4.cloudfront.net"
+    ]
+
+    allowed_methods = [
+      "PUT",
+      "GET",
+      "HEAD"
+    ]
+
+    allowed_headers = [
+      "*"
+    ]
+
+    expose_headers = [
+      "ETag"
+    ]
+
+    max_age_seconds = 3600
   }
 }
 resource "aws_s3_bucket_lifecycle_configuration" "documents" {
@@ -42,6 +59,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "documents" {
   rule {
     id     = "expire-incomplete-uploads"
     status = "Enabled"
+
+    filter {}
+
     abort_incomplete_multipart_upload { days_after_initiation = 1 }
   }
 }
@@ -230,7 +250,10 @@ resource "aws_s3_bucket_policy" "portal" {
   policy = data.aws_iam_policy_document.portal.json
 }
 resource "aws_s3_object" "portal_files" {
-  for_each     = fileset("${path.module}/../portal", "**/*")
+  for_each = setsubtract(
+    fileset("${path.module}/../portal", "**/*"),
+    toset(["config.js"])
+  )
   bucket       = aws_s3_bucket.portal.id
   key          = each.value
   source       = "${path.module}/../portal/${each.value}"
