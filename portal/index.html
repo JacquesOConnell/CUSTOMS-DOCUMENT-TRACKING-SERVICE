@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JNIT Document Flow POC</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <img src="assets/jnit-logo.png" alt="JNIT Cloud Solutions" class="logo" />
+    <div class="product">Document Flow</div>
+    <nav id="portalNav" aria-label="Portal selector">
+      <button class="nav active" data-view="tracking">Tracking board</button>
+      <button class="nav" data-view="agent">Agent portal</button>
+      <button class="nav" data-view="customer">Customer portal</button>
+      <button class="nav" data-view="admin">Admin portal</button>
+    </nav>
+    <div class="poc-note"><strong>POC mode</strong><span>Role switching enabled</span></div>
+  </aside>
+
+  <main>
+    <header>
+      <div><p class="eyebrow" id="eyebrow">LIVE OPERATIONS</p><h1 id="pageTitle">Document tracking board</h1></div>
+      <div class="header-actions"><span class="live"><i></i> Live</span><button class="outline" id="resetDemo">Reset demo</button></div>
+    </header>
+
+    <section class="view active" id="tracking">
+      <div class="metrics" id="metrics"></div>
+      <div class="section-head"><div><h2>Operations pipeline</h2><p>Every job moves through one controlled queue.</p></div><span class="timestamp" id="updatedAt"></span></div>
+      <div class="board" id="trackingBoard"></div>
+    </section>
+
+    <section class="view" id="agent">
+      <div class="agent-strip"><div><span class="avatar">JO</span><div><strong>Jacques O'Connell</strong><small>Clearing agent · EMP-014</small></div></div><span class="availability">Available</span></div>
+      <div class="split">
+        <div><div class="section-head"><div><h2>Incoming queue</h2><p>Accept a job to move it into your work queue.</p></div></div><div id="incomingList" class="job-list"></div></div>
+        <div><div class="section-head"><div><h2>My active work</h2><p>Jobs currently assigned to you.</p></div></div><div id="activeList" class="job-list"></div></div>
+      </div>
+    </section>
+
+    <section class="view" id="customer">
+      <div class="customer-hero"><div><p class="eyebrow">NAMGOLA LOGISTICS</p><h2>Welcome back, Anna</h2><p>Upload a new document pack or follow an existing job.</p></div><button class="primary" id="openUpload">+ New document upload</button></div>
+      <div class="customer-grid"><div><h2>Your jobs</h2><div id="customerJobs" class="job-list"></div></div><div class="message-panel"><h3>Messages & requests</h3><div id="customerMessages"></div></div></div>
+    </section>
+
+    <section class="view" id="admin">
+      <div class="metrics admin-metrics"><article><span>Active customers</span><strong>12</strong><small>2 added this month</small></article><article><span>Portal users</span><strong>28</strong><small>Across all roles</small></article><article><span>Audit events today</span><strong id="auditCount">0</strong><small>Recorded automatically</small></article><article><span>Storage used</span><strong>1.8 GB</strong><small>POC sample data</small></article></div>
+      <div class="admin-grid"><div><div class="section-head"><div><h2>Customer directory</h2><p>Manage customer identity and return contacts.</p></div><button class="primary small">+ Add customer</button></div><table><thead><tr><th>Customer</th><th>Primary contact</th><th>Jobs</th><th>Status</th></tr></thead><tbody><tr><td>Namgola Logistics</td><td>anna@namgola.example</td><td>3</td><td><span class="pill green">Active</span></td></tr><tr><td>ABC Logistics</td><td>ops@abclogistics.example</td><td>1</td><td><span class="pill green">Active</span></td></tr></tbody></table></div><div><h2>Recent audit activity</h2><div id="auditLog" class="audit"></div></div></div>
+    </section>
+  </main>
+
+  <dialog id="uploadDialog">
+    <form id="uploadForm" method="dialog">
+      <button class="dialog-close" type="button" id="closeUpload" aria-label="Close">×</button>
+      <p class="eyebrow">CUSTOMER UPLOAD</p><h2>Create a new document job</h2><p class="muted">The POC creates a tracking reference immediately.</p>
+      <label>Customer<input name="customer" value="Namgola Logistics" required /></label>
+      <div class="form-row"><label>Contact name<input name="contact" value="Anna Mokoena" required /></label><label>Contact email<input name="email" type="email" value="anna@namgola.example" required /></label></div>
+      <div class="form-row"><label>Border post<select name="border"><option>Lebombo</option><option>Beitbridge</option><option>Skilpadshek</option><option>Other</option></select></label><label>Country of origin<input name="origin" value="South Africa" /></label></div>
+      <label>Document pack<input name="document" type="file" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx" required /></label>
+      <label>Instructions<textarea name="notes" placeholder="Add the shipment reference or instructions for the clearing team"></textarea></label>
+      <div class="dialog-actions"><button type="button" class="outline" id="cancelUpload">Cancel</button><button class="primary" type="submit">Upload and create job</button></div>
+    </form>
+  </dialog>
+  <div id="toast" role="status"></div>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

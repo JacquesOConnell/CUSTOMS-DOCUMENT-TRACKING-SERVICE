@@ -1,0 +1,4 @@
+aws_region     = "af-south-1"
+project_name   = "jnit-customs-document-tracking"
+environment    = "poc"
+allowed_origin = "*" # Replace with the CloudFront/custom domain after the first apply.
