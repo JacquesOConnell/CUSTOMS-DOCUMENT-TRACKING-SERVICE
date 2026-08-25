@@ -132,19 +132,36 @@ Lambda workflow | SQS | EventBridge
    documents      records  monitoring
 ```
 
-### Services currently represented in the repository
+### What each AWS service does
 
-- Amazon CloudFront
-- Amazon S3
-- Amazon API Gateway
-- AWS Lambda
-- Amazon DynamoDB
-- Amazon Cognito
-- Amazon CloudWatch
-- AWS IAM
-- AWS Certificate Manager
+| AWS service | Responsibility in this platform | Delivery status |
+|---|---|---|
+| **Amazon CloudFront** | Delivers the web portal through AWS edge locations while keeping the portal's S3 bucket private. It is also the entry point for the optional custom portal domain. | Included in the POC infrastructure |
+| **Amazon S3** | Provides two types of storage: a private origin for the static portal and a separate versioned bucket for incoming, requested and completed customer documents. Pre-signed URLs allow controlled uploads and downloads without exposing the bucket publicly. | Included in the POC infrastructure |
+| **Amazon API Gateway** | Exposes the HTTPS API used by the portal for jobs, document links, messages, users, audit records and health checks. It routes requests to the workflow Lambda function. | Included in the POC infrastructure |
+| **AWS Lambda** | Runs the serverless backend. It creates jobs, generates references and pre-signed S3 links, updates status and ownership, stores messages, manages user profiles and writes audit events. | Included in the POC infrastructure |
+| **Amazon DynamoDB** | Stores operational metadata in separate tables for jobs, customers, users, messages and audit events. Documents themselves remain in S3. | Included in the POC infrastructure |
+| **Amazon Cognito** | Supplies sign-in identities and defines customer, agent, manager and administrator groups. API Gateway routes are configured to require Cognito JWTs, except for the health endpoint. The complete application must additionally enforce role permissions and customer-level data isolation. | Authentication and JWT route protection defined; role and tenant enforcement requires completion and testing |
+| **AWS Identity and Access Management (IAM)** | Gives AWS components only the permissions they need—for example, allowing Lambda to access the required DynamoDB tables, S3 objects and logs. It also supports controlled deployment access. | Included in the POC infrastructure |
+| **Amazon CloudWatch** | Captures Lambda application logs. In production it will also provide dashboards, metrics and alarms for API failures, queue backlogs, processing errors and delivery failures. | Basic logging included; production monitoring and alarms planned |
+| **AWS Certificate Manager (ACM)** | Issues and manages the TLS certificate used to serve the optional custom portal domain over HTTPS. | Included for the custom-domain design |
+| **Amazon Simple Email Service (SES)** | Will receive documents sent to dedicated business mailboxes and send customer requests, status notifications and completed-document delivery messages. | Production design—not yet implemented |
+| **Amazon Simple Queue Service (SQS)** | Will separate intake, scanning, workflow and notification tasks so temporary failures can be retried without losing a submission. A dead-letter queue will retain repeatedly failed events for investigation. | Production design—not yet implemented |
+| **Amazon EventBridge** | Will publish and route business events such as job created, documents requested, files received, job ready to send and delivery failed. This keeps notifications and integrations separate from the core API. | Production design—not yet implemented |
+| **AWS Key Management Service (KMS)** | Can provide customer-managed encryption keys and tighter control over access to sensitive documents, database records and queued messages where the approved security design requires it. | To be assessed during production security design |
+| **Amazon GuardDuty / security monitoring services** | Can contribute AWS account and workload threat findings. They complement—but do not replace—application-level file validation and malware scanning. | To be assessed during production security design |
 
-SES, SQS and EventBridge are part of the wider production design for multichannel intake, resilient processing and notifications.
+### How the services work together
+
+1. **CloudFront** securely loads the portal from the private **S3** web bucket.
+2. **Cognito** authenticates the user and supplies their platform identity and role.
+3. The portal sends HTTPS workflow requests to **API Gateway**.
+4. **API Gateway** authorises and routes allowed requests to **Lambda**.
+5. **Lambda** applies workflow rules and reads or writes operational records in **DynamoDB**.
+6. For document transfers, **Lambda** creates time-limited links to the private document **S3** bucket.
+7. **IAM** controls which AWS resources each component may access.
+8. **CloudWatch** records activity and alerts the operations team when failures require attention.
+9. In the production design, **SES** receives and sends email while **SQS** and **EventBridge** process workflow events reliably in the background.
 
 ## Document organisation
 
